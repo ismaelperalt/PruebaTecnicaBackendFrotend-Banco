@@ -1,0 +1,348 @@
+{
+  "info": {
+    "_postman_id": "6b821165-36f4-4511-91f3-61d09f3bf6c3",
+    "name": "BackendBanco CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "22099892"
+  },
+  "item": [
+    {
+      "name": "Cliente",
+      "item": [
+        {
+          "name": "CrearClientes",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n      \"nombre\": \"Juan Osorio\",\r\n      \"genero\": \"Masculino\",\r\n      \"edad\": 35,\r\n      \"identificacion\": \"03030303\",\r\n      \"direccion\": \"13 junio y Equinoccial\",\r\n      \"telefono\": \"098874587\",\r\n      \"contrasena\": \"5678\",\r\n      \"estado\": true\r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/clientes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "clientes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ActulizarClientes",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n      \"nombre\": \"Darwin Peralta\",\r\n      \"genero\": \"Masculino\",\r\n      \"edad\": 27,\r\n      \"identificacion\": \"03030303\",\r\n      \"direccion\": \"13 junio y Equinoccial\",\r\n      \"telefono\": \"098874587\",\r\n      \"contrasena\": \"4334\",\r\n      \"estado\": true\r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/clientes/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "clientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ListarTodosClientes",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "BarradoLogicoCliente(false)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/clientes/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "clientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cuenta",
+      "item": [
+        {
+          "name": "CrearCuentasMasClientes",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numeroCuenta\": \"585545\",\r\n  \"tipoCuenta\": \"Corriente\",\r\n  \"saldoInicial\": 540,\r\n  \"estado\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/cuentas/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "cuentas",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ActulizarCuenta",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipoCuenta\": \"Corriente\",\r\n  \"saldoInicial\": 540,\r\n  \"estado\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/cuentas/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "cuentas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ListarCuentas",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n      \"nombre\": \"Juan Osorio\",\r\n      \"genero\": \"Masculino\",\r\n      \"edad\": 35,\r\n      \"identificacion\": \"03030303\",\r\n      \"direccion\": \"13 junio y Equinoccial\",\r\n      \"telefono\": \"098874587\",\r\n      \"contrasena\": \"5678\",\r\n      \"estado\": true\r\n    }"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/cuentas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BorradoLogicoCuenta(false)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/cuentas/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "cuentas",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Movimientos",
+      "item": [
+        {
+          "name": "Movimientos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numeroCuenta\": \"496825\",\r\n  \"valor\": -540.0\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/movimientos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "movimientos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ListarMovimientos",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n      \"nombre\": \"Juan Osorio\",\r\n      \"genero\": \"Masculino\",\r\n      \"edad\": 35,\r\n      \"identificacion\": \"03030303\",\r\n      \"direccion\": \"13 junio y Equinoccial\",\r\n      \"telefono\": \"098874587\",\r\n      \"contrasena\": \"5678\",\r\n      \"estado\": true\r\n    }"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/movimientos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "movimientos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "BorradoLogicoMovimientos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n      \"nombre\": \"Juan Osorio\",\r\n      \"genero\": \"Masculino\",\r\n      \"edad\": 35,\r\n      \"identificacion\": \"03030303\",\r\n      \"direccion\": \"13 junio y Equinoccial\",\r\n      \"telefono\": \"098874587\",\r\n      \"contrasena\": \"5678\",\r\n      \"estado\": true\r\n    }"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/movimientos/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "movimientos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reporte",
+      "item": [
+        {
+          "name": "ListadodeMovimientoXFechas",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numeroCuenta\": \"496825\",\r\n  \"valor\": -540.0\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/reportes?clienteId=3&inicio=2026-01-01&fin=2026-01-16",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "reportes"
+              ],
+              "query": [
+                {
+                  "key": "clienteId",
+                  "value": "3"
+                },
+                {
+                  "key": "inicio",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "fin",
+                  "value": "2026-01-16"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
