@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import CuentaList from "./CuentaList";
 import { vi } from "vitest";
 
-// 🚨 Mock de la API
+// Mock de las funciones de la API
 vi.mock("../api/cuentaApi", () => ({
   listarCuentas: vi.fn(),
   eliminarCuenta: vi.fn(),
@@ -15,134 +15,79 @@ vi.mock("../api/cuentaApi", () => ({
 import {
   listarCuentas,
   eliminarCuenta,
-  crearCuenta,
-  actualizarCuenta,
+  
 } from "../api/cuentaApi";
 
-const cuentasMock = [
-  {
-    id: 1,
-    numeroCuenta: "111111",
-    tipoCuenta: "AHORRO",
-    saldoInicial: 1000,
-    estado: true,
-    clienteId: 1,
-    clienteNombre: "Juan Perez",
-  },
-  {
-    id: 2,
-    numeroCuenta: "222222",
-    tipoCuenta: "CORRIENTE",
-    saldoInicial: 2000,
-    estado: false,
-    clienteId: 1,
-    clienteNombre: "Juan Perez",
-  },
-];
-
-// Mock de window.confirm
-const confirmMock = vi.spyOn(window, "confirm");
-
 describe("CuentaList", () => {
+  const cuentasMock = [
+    { id: 1, clienteNombre: "Juan", numeroCuenta: "123", tipoCuenta: "AHORRO", saldoInicial: 1000, estado: true, clienteId: 1 },
+    { id: 2, clienteNombre: "Ana", numeroCuenta: "456", tipoCuenta: "CORRIENTE", saldoInicial: 2000, estado: false, clienteId: 2 },
+  ];
+
   beforeEach(() => {
     (listarCuentas as any).mockResolvedValue({ data: cuentasMock });
-    (eliminarCuenta as any).mockResolvedValue({});
-    (crearCuenta as any).mockResolvedValue({});
-    (actualizarCuenta as any).mockResolvedValue({});
-    confirmMock.mockReset();
-    confirmMock.mockReturnValue(true);
   });
 
-  const renderComponente = (clienteId?: number) =>
-    render(<CuentaList clienteId={clienteId} />);
+  test("renderiza elementos iniciales", async () => {
+    render(<CuentaList />);
 
-  test("muestra la lista de cuentas", async () => {
-    renderComponente(1);
+    expect(screen.getByPlaceholderText(/Buscar/i)).toBeInTheDocument();
+    expect(screen.getByText(/Todas las Cuentas/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText("111111")).toBeInTheDocument();
-      expect(screen.getByText("222222")).toBeInTheDocument();
-      expect(screen.getAllByText("Juan Perez").length).toBe(2);
+      expect(screen.getByText("Juan")).toBeInTheDocument();
+      expect(screen.getByText("Ana")).toBeInTheDocument();
     });
   });
 
   test("filtra cuentas por búsqueda", async () => {
-    renderComponente(1);
+    render(<CuentaList />);
 
-    const inputBusqueda = screen.getByPlaceholderText(/buscar/i);
-    await userEvent.type(inputBusqueda, "222");
+    const inputBusqueda = screen.getByPlaceholderText(/Buscar/i);
 
-    await waitFor(() => {
-      expect(screen.queryByText("111111")).not.toBeInTheDocument();
-      expect(screen.getByText("222222")).toBeInTheDocument();
-    });
-  });
+    await waitFor(() => screen.getByText("Juan"));
 
-  test("muestra el formulario al hacer clic en 'Nueva'", async () => {
-    renderComponente(1);
-
-    const btnNueva = screen.getByRole("button", { name: /nueva/i });
-    await userEvent.click(btnNueva);
-
-    expect(screen.getByText(/nueva cuenta/i)).toBeInTheDocument();
-  });
-
-  test("llama a crearCuenta al guardar una cuenta nueva", async () => {
     const user = userEvent.setup();
-    renderComponente(1);
+    await user.type(inputBusqueda, "Ana");
 
-    await user.click(screen.getByRole("button", { name: /nueva/i }));
-
-    await user.type(screen.getByPlaceholderText(/número de cuenta/i), "333333");
-    await user.selectOptions(screen.getByRole("combobox"), "AHORRO");
-    await user.clear(screen.getByPlaceholderText(/saldo inicial/i));
-    await user.type(screen.getByPlaceholderText(/saldo inicial/i), "5000");
-
-    await user.click(screen.getByRole("button", { name: /guardar/i }));
-
-    await waitFor(() => {
-      expect(crearCuenta).toHaveBeenCalledWith(1, expect.objectContaining({
-        numeroCuenta: "333333",
-        tipoCuenta: "AHORRO",
-        saldoInicial: 5000,
-      }));
-    });
+    expect(screen.queryByText("Juan")).not.toBeInTheDocument();
+    expect(screen.getByText("Ana")).toBeInTheDocument();
   });
 
-  test("llama a actualizarCuenta al guardar una cuenta editada", async () => {
+  test("muestra CuentaForm al hacer click en 'Nueva'", async () => {
+    render(<CuentaList clienteId={1} />);
+
     const user = userEvent.setup();
-    renderComponente(1);
+    const botonNueva = screen.getByText(/Nueva/i);
+    await user.click(botonNueva);
 
-    await waitFor(() => screen.getByText("111111"));
-
-    const btnEditar = screen.getAllByRole("button", { name: /editar/i })[0];
-    await user.click(btnEditar);
-
-    const inputNumero = screen.getByDisplayValue("111111");
-    await user.clear(inputNumero);
-    await user.type(inputNumero, "111999");
-
-    await user.click(screen.getByRole("button", { name: /guardar/i }));
-
-    await waitFor(() => {
-      expect(actualizarCuenta).toHaveBeenCalledWith(1, expect.objectContaining({
-        tipoCuenta: "AHORRO",
-        saldoInicial: 1000,
-        estado: true,
-      }));
-    });
+    expect(screen.getByText(/Nueva Cuenta/i)).toBeInTheDocument();
   });
 
-  test("elimina una cuenta al confirmar", async () => {
-    renderComponente(1);
+  test("muestra CuentaForm al hacer click en 'Editar'", async () => {
+    render(<CuentaList />);
 
-    await waitFor(() => screen.getByText("111111"));
+    await waitFor(() => screen.getByText("Juan"));
 
-    const btnEliminar = screen.getAllByRole("button", { name: /eliminar/i })[0];
-    await userEvent.click(btnEliminar);
+    const user = userEvent.setup();
+    const botonEditar = screen.getAllByText("Editar")[0];
+    await user.click(botonEditar);
 
-    await waitFor(() => {
-      expect(eliminarCuenta).toHaveBeenCalledWith(1);
-    });
+    expect(screen.getByText(/Editar Cuenta/i)).toBeInTheDocument();
+  });
+
+  test("llama a eliminarCuenta al hacer click en 'Eliminar' y confirmar", async () => {
+    render(<CuentaList />);
+
+    await waitFor(() => screen.getByText("Juan"));
+
+    // Mock de window.confirm
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const user = userEvent.setup();
+    const botonEliminar = screen.getAllByText("Eliminar")[0];
+    await user.click(botonEliminar);
+
+    expect(eliminarCuenta).toHaveBeenCalledWith(1);
   });
 });

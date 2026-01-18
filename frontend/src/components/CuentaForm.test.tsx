@@ -2,52 +2,48 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CuentaForm from "./CuentaForm";
-import type { Cuenta } from "../model/Cuenta";
 import { vi } from "vitest";
 
 describe("CuentaForm", () => {
-  const cuentaMock: Cuenta = {
-    id: 1,
-    numeroCuenta: "123456",
-    tipoCuenta: "AHORRO",
-    saldoInicial: 1000,
-    estado: true,
-    clienteId: 1,
-    clienteNombre: "Juan Perez",
-  };
+  const clienteId = 1;
 
   test("renderiza correctamente los inputs y botones", () => {
     const mockGuardar = vi.fn();
     const mockCancelar = vi.fn();
 
-    render(<CuentaForm clienteId={1} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
+    render(<CuentaForm clienteId={clienteId} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
 
-    expect(screen.getByPlaceholderText(/número de cuenta/i)).toBeInTheDocument();
+    // Inputs y select
+    expect(screen.getByPlaceholderText(/Número de Cuenta/i)).toBeInTheDocument();
     expect(screen.getByRole("combobox")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/saldo inicial/i)).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: /activa/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /guardar/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /cancelar/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Saldo inicial/i)).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: /Activa/i })).toBeInTheDocument();
+
+    // Botones
+    expect(screen.getByRole("button", { name: /Guardar/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cancelar/i })).toBeInTheDocument();
   });
 
-  test("permite escribir en los inputs y cambiar el checkbox", async () => {
+  test("permite escribir en los inputs, seleccionar tipo y cambiar checkbox", async () => {
     const mockGuardar = vi.fn();
     const mockCancelar = vi.fn();
     const user = userEvent.setup();
 
-    render(<CuentaForm clienteId={1} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
+    render(<CuentaForm clienteId={clienteId} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
 
-    const inputNumero = screen.getByPlaceholderText(/número de cuenta/i);
+    const inputNumero = screen.getByPlaceholderText(/Número de Cuenta/i);
     const selectTipo = screen.getByRole("combobox");
-    const inputSaldo = screen.getByPlaceholderText(/saldo inicial/i);
-    const checkbox = screen.getByRole("checkbox", { name: /activa/i });
+    const inputSaldo = screen.getByPlaceholderText(/Saldo inicial/i);
+    const checkbox = screen.getByRole("checkbox", { name: /Activa/i });
 
+    // Interacciones
     await user.type(inputNumero, "654321");
     await user.selectOptions(selectTipo, "CORRIENTE");
     await user.clear(inputSaldo);
     await user.type(inputSaldo, "2000");
     await user.click(checkbox); // desactiva
 
+    // Validaciones
     expect((inputNumero as HTMLInputElement).value).toBe("654321");
     expect((selectTipo as HTMLSelectElement).value).toBe("CORRIENTE");
     expect((inputSaldo as HTMLInputElement).value).toBe("2000");
@@ -59,24 +55,44 @@ describe("CuentaForm", () => {
     const mockCancelar = vi.fn();
     const user = userEvent.setup();
 
-    render(<CuentaForm clienteId={1} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
+    render(<CuentaForm clienteId={clienteId} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
 
-    await user.type(screen.getByPlaceholderText(/número de cuenta/i), "999888");
+    // Llenar formulario
+    await user.type(screen.getByPlaceholderText(/Número de Cuenta/i), "999888");
     await user.selectOptions(screen.getByRole("combobox"), "AHORRO");
-    await user.clear(screen.getByPlaceholderText(/saldo inicial/i));
-    await user.type(screen.getByPlaceholderText(/saldo inicial/i), "5000");
+    await user.clear(screen.getByPlaceholderText(/Saldo inicial/i));
+    await user.type(screen.getByPlaceholderText(/Saldo inicial/i), "5000");
 
-    await user.click(screen.getByRole("button", { name: /guardar/i }));
+    // Enviar
+    await user.click(screen.getByRole("button", { name: /Guardar/i }));
 
-    expect(mockGuardar).toHaveBeenCalledWith(
-      expect.objectContaining({
-        numeroCuenta: "999888",
-        tipoCuenta: "AHORRO",
-        saldoInicial: 5000,
-        estado: true,
-        clienteId: 1,
-      })
-    );
+    // Validar llamada
+    expect(mockGuardar).toHaveBeenCalledWith({
+      id: undefined,
+      numeroCuenta: "999888",
+      tipoCuenta: "AHORRO",
+      saldoInicial: 5000,
+      estado: true,
+      clienteId: clienteId,
+      clienteNombre: "",
+    });
+  });
+
+  test("no permite letras en saldoInicial", async () => {
+    const mockGuardar = vi.fn();
+    const mockCancelar = vi.fn();
+    const user = userEvent.setup();
+
+    render(<CuentaForm clienteId={clienteId} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
+
+    const inputSaldo = screen.getByPlaceholderText(/Saldo inicial/i);
+
+    // Intentar escribir letras
+    await user.clear(inputSaldo);
+    await user.type(inputSaldo, "12abc34.5xyz");
+
+    // Validar que solo queden números y punto
+    expect((inputSaldo as HTMLInputElement).value).toBe("1234.5");
   });
 
   test("llama a onCancelar al hacer clic en cancelar", async () => {
@@ -84,10 +100,9 @@ describe("CuentaForm", () => {
     const mockCancelar = vi.fn();
     const user = userEvent.setup();
 
-    render(<CuentaForm clienteId={1} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
+    render(<CuentaForm clienteId={clienteId} onGuardar={mockGuardar} onCancelar={mockCancelar} />);
 
-    await user.click(screen.getByRole("button", { name: /cancelar/i }));
-
+    await user.click(screen.getByRole("button", { name: /Cancelar/i }));
     expect(mockCancelar).toHaveBeenCalled();
   });
 });

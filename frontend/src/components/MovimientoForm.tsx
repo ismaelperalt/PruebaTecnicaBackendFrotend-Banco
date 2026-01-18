@@ -11,28 +11,29 @@ export default function MovimientoForm({
   onGuardar,
   onCancelar,
 }: Props) {
-  const [valor, setValor] = useState<number>(0);
+  const [valorStr, setValorStr] = useState<string>("0"); // Guardamos como string
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onGuardar(valor);
+    const valorNum = Number(valorStr); // Convertimos solo al enviar
+    if (isNaN(valorNum)) {
+      alert("Ingresa un número válido");
+      return;
+    }
+    onGuardar(valorNum);
   };
 
   return (
     <form onSubmit={handleSubmit} style={styles.form}>
       <h3>Nuevo Movimiento</h3>
 
-      <input
-        type="text"
-        value={numeroCuenta}
-        disabled
-      />
+      <input type="text" value={numeroCuenta} disabled />
 
       <input
-        type="number"
+        type="text"
         placeholder="Valor (+ depósito / - retiro)"
-        value={valor}
-        onChange={(e) => setValor(Number(e.target.value))}
+        value={valorStr}
+        onChange={(e) => setValorStr(e.target.value)}
         required
       />
 

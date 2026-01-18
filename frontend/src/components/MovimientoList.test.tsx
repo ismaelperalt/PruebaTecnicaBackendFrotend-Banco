@@ -1,95 +1,116 @@
+// src/components/MovimientoList.test.tsx
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
 import MovimientoList from "./MovimientoList";
+import { vi } from "vitest";
+
+// Mock de las funciones de la API
+vi.mock("../api/movimientoApi", () => ({
+  listarMovimientos: vi.fn(),
+  listarMovimientosPorCuenta: vi.fn(),
+  crearMovimiento: vi.fn(),
+  eliminarMovimiento: vi.fn(),
+}));
+
 import {
+  listarMovimientos,
   listarMovimientosPorCuenta,
   crearMovimiento,
   eliminarMovimiento,
 } from "../api/movimientoApi";
 
-// 🔹 Mock de la API
-vi.mock("../api/movimientoApi");
-
 describe("MovimientoList", () => {
   const movimientosMock = [
     {
       id: 1,
-      numeroCuenta: "111",
-      tipoMovimiento: "DEPOSITO",
-      valor: 500,
-      saldo: 1500,
-      fecha: "2026-01-17T00:00:00",
+      numeroCuenta: "123",
+      tipoMovimiento: "DEPÓSITO",
+      valor: 1000,
+      saldo: 1000,
+      fecha: new Date().toISOString(),
       estado: true,
     },
     {
       id: 2,
-      numeroCuenta: "111",
+      numeroCuenta: "123",
       tipoMovimiento: "RETIRO",
-      valor: -200,
-      saldo: 1300,
-      fecha: "2026-01-17T01:00:00",
+      valor: 500,
+      saldo: 500,
+      fecha: new Date().toISOString(),
       estado: true,
     },
   ];
 
   beforeEach(() => {
+    (listarMovimientos as any).mockResolvedValue({ data: movimientosMock });
     (listarMovimientosPorCuenta as any).mockResolvedValue({ data: movimientosMock });
-    (crearMovimiento as any).mockResolvedValue({});
-    (eliminarMovimiento as any).mockResolvedValue({});
+    vi.spyOn(window, "confirm").mockReturnValue(true); // confirm siempre true
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  test("muestra la lista de movimientos", async () => {
-    render(<MovimientoList numeroCuenta="111" />);
-    expect(await screen.findByText(/DEPOSITO/i)).toBeInTheDocument();
-    expect(screen.getByText(/RETIRO/i)).toBeInTheDocument();
+  test("renderiza correctamente elementos y tabla", async () => {
+    render(<MovimientoList />);
+
+    expect(screen.getByText(/Todos los Movimientos/i)).toBeInTheDocument();
+
+    // usamos getAllByText porque hay varias filas con "123"
+    await waitFor(() => {
+      const cuentas = screen.getAllByText("123");
+      expect(cuentas.length).toBeGreaterThan(0); // al menos una fila
+      expect(screen.getByText("DEPÓSITO")).toBeInTheDocument();
+      expect(screen.getByText("RETIRO")).toBeInTheDocument();
+    });
   });
 
-  test("abre el formulario al hacer clic en 'Nuevo Movimiento'", async () => {
-    render(<MovimientoList numeroCuenta="111" />);
-    const btnNuevo = screen.getByText(/Nuevo Movimiento/i, { selector: "button" });
-    await userEvent.click(btnNuevo);
+  test("muestra MovimientoForm al hacer click en 'Nuevo Movimiento'", async () => {
+    render(<MovimientoList numeroCuenta="123" />);
 
-    // Verifica que el formulario se muestre
-    expect(screen.getByRole("textbox", { name: "" })).toHaveValue("111");
-    expect(screen.getByPlaceholderText(/\+ depósito \/ - retiro/i)).toBeInTheDocument();
+    await waitFor(() => screen.getByText(/Movimientos de la Cuenta 123/i));
+
+    const user = userEvent.setup();
+
+    // seleccionamos el botón específicamente por role y nombre
+    const botonNuevo = screen.getByRole("button", { name: /Nuevo Movimiento/i });
+    await user.click(botonNuevo);
+
+    // verificamos que el form aparece buscando el heading del formulario
+    expect(screen.getByRole("heading", { name: /Nuevo Movimiento/i })).toBeInTheDocument();
   });
 
   test("llama a crearMovimiento al guardar un nuevo movimiento", async () => {
-    render(<MovimientoList numeroCuenta="111" />);
-    const btnNuevo = screen.getByText(/Nuevo Movimiento/i, { selector: "button" });
-    await userEvent.click(btnNuevo);
+    render(<MovimientoList numeroCuenta="123" />);
 
-    const inputValor = screen.getByPlaceholderText(/\+ depósito \/ - retiro/i);
-    await userEvent.type(inputValor, "1000");
+    const user = userEvent.setup();
+    const botonNuevo = screen.getByRole("button", { name: /Nuevo Movimiento/i });
+    await user.click(botonNuevo);
 
-    const btnGuardar = screen.getByRole("button", { name: /Guardar/i });
-    await userEvent.click(btnGuardar);
+    const inputValor = screen.getByPlaceholderText(/Valor/i);
+
+    await user.clear(inputValor);
+    await user.type(inputValor, "2000");
+
+    await user.click(screen.getByRole("button", { name: /Guardar/i }));
 
     await waitFor(() => {
       expect(crearMovimiento).toHaveBeenCalledWith({
-        numeroCuenta: "111",
-        valor: 1000,
+        numeroCuenta: "123",
+        valor: 2000,
       });
     });
   });
 
-  test("anula un movimiento al confirmar", async () => {
-    // Mock de window.confirm
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+  test("llama a eliminarMovimiento al hacer click en 'Anular' y confirmar", async () => {
+    render(<MovimientoList numeroCuenta="123" />);
 
-    render(<MovimientoList numeroCuenta="111" />);
-    const btnAnular = await screen.findAllByText(/Anular/i);
-    await userEvent.click(btnAnular[0]);
+    await waitFor(() => screen.getByText("DEPÓSITO"));
 
-    await waitFor(() => {
-      expect(eliminarMovimiento).toHaveBeenCalledWith(1);
-    });
+    const user = userEvent.setup();
+    const botonAnular = screen.getAllByText("Anular")[0]; // usamos getAllByText porque hay más de uno
+    await user.click(botonAnular);
 
-    confirmSpy.mockRestore();
+    expect(eliminarMovimiento).toHaveBeenCalledWith(1);
   });
 });

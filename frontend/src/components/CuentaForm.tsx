@@ -25,8 +25,10 @@ export default function CuentaForm({ cuenta, onGuardar, onCancelar, clienteId }:
 
     if (type === "checkbox") {
       newValue = (e.target as HTMLInputElement).checked;
-    } else if (type === "number") {
-      newValue = Number(value);
+    } else if (name === "saldoInicial") {
+      // Permitimos solo números y punto
+      const cleanedValue = value.replace(/[^0-9.]/g, "");
+      newValue = cleanedValue;
     } else {
       newValue = value;
     }
@@ -36,7 +38,14 @@ export default function CuentaForm({ cuenta, onGuardar, onCancelar, clienteId }:
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onGuardar(form);
+
+    // Convertimos saldoInicial a número antes de enviar
+    const formToSave = {
+      ...form,
+      saldoInicial: Number(form.saldoInicial),
+    };
+
+    onGuardar(formToSave);
   };
 
   return (
@@ -58,7 +67,7 @@ export default function CuentaForm({ cuenta, onGuardar, onCancelar, clienteId }:
       </select>
 
       <input
-        type="number"
+        type="text"
         name="saldoInicial"
         placeholder="Saldo inicial"
         value={form.saldoInicial}

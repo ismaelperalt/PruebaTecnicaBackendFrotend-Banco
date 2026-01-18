@@ -32,7 +32,7 @@ export default function ReporteView() {
       <h2>Reporte de Estado de Cuenta</h2>
 
       <input
-        type="number"
+        type="text"
         placeholder="ID Cliente"
         value={clienteId || ""}
         onChange={(e) => setClienteId(Number(e.target.value))}
